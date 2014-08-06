@@ -1,0 +1,24 @@
+
+
+
+#You can find the parameter description in Readme or in the java code.
+
+#in the directory: ./SingleSourceKShortestPaths/bin 
+
+#The followings are to run the k shortest paths algorithm for UnknownCausal with different K
+	java SingleSourceKShortestPaths ../sample_input_graphs/allgraphs_all ../sample_input_graphs/allProteins 1 1
+	java SingleSourceKShortestPaths ../sample_input_graphs/allgraphs_all ../sample_input_graphs/allProteins 3 1
+	java SingleSourceKShortestPaths ../sample_input_graphs/allgraphs_all ../sample_input_graphs/allProteins 5 1
+	java SingleSourceKShortestPaths ../sample_input_graphs/allgraphs_all ../sample_input_graphs/allProteins 10 1
+
+#The followings are to run the k shortest paths algorithm for candidateCausal with different K
+	java SingleSourceKShortestPaths ../sample_input_graphs/allgraphs_all ../sample_input_graphs/allProteins 1 3
+	java SingleSourceKShortestPaths ../sample_input_graphs/allgraphs_all ../sample_input_graphs/allProteins 3 3
+	java SingleSourceKShortestPaths ../sample_input_graphs/allgraphs_all ../sample_input_graphs/allProteins 5 3
+	java SingleSourceKShortestPaths ../sample_input_graphs/allgraphs_all ../sample_input_graphs/allProteins 10 3
+
+#The followings are to run the k diverse short paths algorithm for UnknownTarget with k=10 and different diversity threshold
+	java SingleSourceKDiverseShortPaths ../sample_input_graphs/allgraphs_all ../sample_input_graphs/allProteins 10 0.25 2
+	java SingleSourceKDiverseShortPaths ../sample_input_graphs/allgraphs_all ../sample_input_graphs/allProteins 10 0.5 2
+	java SingleSourceKDiverseShortPaths ../sample_input_graphs/allgraphs_all ../sample_input_graphs/allProteins 10 0.75 2
+	java SingleSourceKDiverseShortPaths ../sample_input_graphs/allgraphs_all ../sample_input_graphs/allProteins 10 1.0 2

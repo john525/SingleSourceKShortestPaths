@@ -1,0 +1,76 @@
+The program was implemented in JAVA 1.6. 
+The detail of the algorithm and its application on biological network can be seen in Y.-K. Shih and S. Parthasarathy, "A single source k-shortest paths algorithm to infer regulatory pathways in a gene network", ISMB 2012.
+Paper link: http://bioinformatics.oxfordjournals.org/content/28/12/i49.abstract
+
+********************************************************************************************************************************
+
+The main java programs are 
+SingleSourceKShortestPaths.java and SingleSourceKShortestPaths_Graph.java, which implement the single-source k shortest paths algorithm, and 
+SingleSourceKDiverseShortPaths.java and SingleSourceKDiverseShortPaths_Graph.java, which implement the single-source k diverse short paths algorithm.
+
+The program can run all gold standards at one time.
+
+*********************input files, directory and parameters**********************************************
+If there are n gold standards, there should be 2*n+2 input files.
+1. In the first parameter, specify a file's path where the file describing all gold standards.
+   The format is:
+   The first line does not matter, and begin on the second line, each line describe a gold standard.
+   <the first gold standards' target gene's name><space><the first gold standards' target gene's number><space><the first gold standards' causal gene's name><space><the first gold standards' causal gene's number><space><the first gold standards' first candidate gene's name><space><the first gold standards' first candidate gene's number><space><the first gold standards' second candidate gene's name><space><the first gold standards' second candidate gene's number><space>......<\n>
+   <the second gold standards' target gene's name><space><the second gold standards' target gene's number><space><the second gold standards' causal gene's name><space><the second gold standards' causal gene's number><space><the second gold standards' first candidate gene's name><space><the second gold standards' first candidate gene's number><space><the second gold standards' second candidate gene's name><space><the second gold standards' second candidate gene's number><space>......<\n>
+   ...
+
+   The sample file is "allgraphs_all" in the directory "sample_input_graphs"
+ 
+2. In the second parameter, specify a file's path where the file describing the mapping between all genes' name and genes' number.
+   The format is
+   <the gene name where this gene's number is 0><\n>
+   <the gene name where this gene's number is 1><\n>
+   <the gene name where this gene's number is 2><\n>
+   ....
+
+   The sample file is "allProteins" in the directory "sample_input_graphs"
+
+3. For each gold standard, there should be 2 files indicating the network: one is for unknownCausal and candidateCausal (the weight is calculated based on the given target gene), and the other is for unknownTarget (the weight is calculated based on the given causal gene).
+   Each file's name is <target gene's name><underscore><causal gene's name>
+   If the file is for unknownTarget, the name should be <target gene's name><underscore><causal gene's name><underscore><"inv">
+
+   The network file's format is:
+   The first line: <# genes><space><target gene's number><space><causal gene's number><space><the first candidate gene's number><space><the second candidate gene's number><space>.....<\n>
+   Begining at the second line, each line indicates a directed edges (A,B): <A's number><space><B's number><space><weight><\n>
+   If an edge is undirected, you have to specify it twice, i.e., (A,B) and (B,A)
+
+   The directory of these files are specified in GraphDir and InvGraphDir in SingleSourceKShortestPaths.java
+   The sample file is "YBR072W_YOR128C", "YBR072W_YOR128C_inv", "YCL030C_YOR128C", "YCL030C_YOR128C_inv" in the directory "sample_input_graphs".
+   
+4. The third parameter is K, the number of paths.
+
+5. The fourth parameter for SingleSourceKDiverseShortPaths.java is the lambda, the diversity threshold to determine whether a path is diverse.
+   The value should be in [0.0, 1.0]
+
+6. The last parameter is the choice of subproblem. 1 means unknownCausal, 2 means unknwonTarget, and 3 means candidateCausal.
+   The program will use different part of gold standards as input, depending on this parameter.
+
+
+Please see the sample_command
+
+*****************************************************output files and directory**********************************************
+
+If there are n gold standards, there should be n+1 output files.
+
+   The directory of these files are specified in RESULT_DIR_UNKNOWNCAUSAL, RESULT_DIR_UNKNOWNTARGET, and RESULT_DIR_CANDIDATECAUSAL in SingleSourceKShortestPaths.java
+
+1. There are a output file for each gold standard. You can choose whether to output the paths or just output the importance value by changing the value of RESULT_SHOW_PATHS in SingleSourceKShortestPaths.java. 
+   This output file sort all genes in the descending order ot the importance value. 
+   The format of each line is <gene number><space><gene name><space><importance value><\n>
+
+2. There is a output indicating the rank of the true (unknown) gene (the causal gene in unknownCausal and candidateCausal; the true target gene in unknownTarget) in the gene list. This file is mainly used in candidateCausal.
+   The format is <target gene><space><causal gene><space><the rank of the true gene>
+   In candidateCausal, if the rank of the true gene has the highest rank, the corresponding line in the output file will have a "*" at the end of this line.
+   
+   
+**********************************************************************************************************
+
+If you have any question or find any bug, please contact Yu-Keng Shih: shihy@cse.ohio-state.edu
+
+Yu-Keng Shih
+Aug 12, 2012
