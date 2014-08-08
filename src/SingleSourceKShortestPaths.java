@@ -37,10 +37,10 @@ public class SingleSourceKShortestPaths {
 	static String l = System.getProperty("file.separator");
 
 	//modify the directory if necessary
-	static String GraphDir = ".."+l+"sample_input_graphs"+l;  //the directory containing graphs for unknownCausal and candidateCausal
-	static String InvGraphDir = ".."+l+"sample_input_graphs"+l;  //the directory containing graphs for unknownTarget
+	String GraphDir = ".."+l+"sample_input_graphs"+l;  //the directory containing graphs for unknownCausal and candidateCausal
+	String InvGraphDir = ".."+l+"sample_input_graphs"+l;  //the directory containing graphs for unknownTarget
 	
-	static String ResultDirectory;
+	String ResultDirectory;
 	static final String RESULT_DIR_UNKNOWNCAUSAL = "result_causal"+l;
 	static final String RESULT_DIR_UNKNOWNTARGET = "result_target"+l;
 	static final String RESULT_DIR_CANDIDATECAUSAL = "result_candidate"+l;
@@ -56,7 +56,7 @@ public class SingleSourceKShortestPaths {
 	static boolean StopCandidate;   //the tree path will stop expand when the tree path arrive a candidate causal gene. It's true only in CandidateCausal
 	static boolean InferringTarget;	//false for inferring causal gene
 	
-	static Hashtable<Integer,String> GeneInNetwork = new Hashtable<Integer,String>();	//map the number for gene to the gene name
+	static Hashtable<Integer,String> nodeNameNetwork = new Hashtable<Integer,String>();	//map the number for gene to the gene name
 	
 	static long heapStart;
 	
@@ -68,23 +68,11 @@ public class SingleSourceKShortestPaths {
 		JFrame frame = new JFrame("K Shortest Paths Algorithm");
 		frame.setSize(669,470);
 		frame.setLocationRelativeTo(null);
+		
+		JTextArea text = new JTextArea();
+		text.setText("Loading...");
+		frame.add(text);
 		frame.setVisible(true);
-		JPanel p = new JPanel() {
-			Image kevin;
-			@Override
-			public void paintComponent(Graphics g) {
-				if(kevin==null) {
-					try {
-						kevin = ImageIO.read(new File("kevin.jpg"));
-					}
-					catch(IOException e) {
-						kevin = null;
-					}
-				}
-				g.drawImage(kevin, 0, 0, 669, 470, null);
-			}
-		};
-		frame.add(p);
 		
 		final int numTrials = 3;
 		double[][][] memData = new double[TestDataGenerator.sizes.length][TestDataGenerator.avgDegrees.length][numTrials];
@@ -166,8 +154,6 @@ public class SingleSourceKShortestPaths {
 			PrintStream stream2 = new PrintStream(timeFile);
 			stream2.println(timeBuilder.toString());
 			stream2.close();
-			JTextArea text = new JTextArea();
-			frame.add(text);
 			text.setText("TIME:\n" + timeBuilder.toString() + "\nMEMORY:\n" + memBuilder.toString());
 			frame.repaint();
 		} catch (Exception e) {
@@ -179,7 +165,7 @@ public class SingleSourceKShortestPaths {
 		heapStart = ExecuteInfo.memoryUsed();
 		
 		NumTotalGene = 0;
-		GeneInNetwork = new Hashtable<Integer,String>();
+		nodeNameNetwork = new Hashtable<Integer,String>();
 
 		KShortestPaths = Integer.valueOf(args[2]);
 		GraphDir = InvGraphDir = args[4];
@@ -211,7 +197,7 @@ public class SingleSourceKShortestPaths {
 		/*Read the gene name and gene number mapping*/
 		while(genelistReader.ready()){
 			String geneName = genelistReader.readLine();
-			GeneInNetwork.put( NumTotalGene , geneName);
+			nodeNameNetwork.put( NumTotalGene , geneName);
 			NumTotalGene ++;
 		}
 		genelistReader.close();
@@ -282,7 +268,7 @@ public class SingleSourceKShortestPaths {
 //			System.out.println("Max Memory: " + res.maxHeap/1000000L + "MB");
 //			System.out.println();
 			
-			File f = new File(ResultDirectory+"K="+KShortestPaths+"_shortestPaths"+"_tg="+tg+"_cg="+cg);
+			File f = new File(ResultDirectory, "K="+KShortestPaths+"_shortestPaths"+"_tg="+tg+"_cg="+cg);
 			if(!f.exists()) f.createNewFile();
 			PrintStream resultOutputStream = new PrintStream(f);
 			if(aGraph.outputResult(resultOutputStream,ResultRankOutputStream))

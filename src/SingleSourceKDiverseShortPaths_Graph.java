@@ -12,10 +12,10 @@ public class SingleSourceKDiverseShortPaths_Graph extends SingleSourceKShortestP
 	static double MAX_DISTANCE =  Double.MAX_VALUE ;  //default distance	
 
 	
-	SingleSourceKDiverseShortPaths_Graph(int numGenes, int tg, int cg){
-		super(numGenes, tg, cg);
-		importances = new ImportanceMultipleRun[numGenes];
-		for(int i=0;i<numGenes;i++){
+	SingleSourceKDiverseShortPaths_Graph(int numNodes, int tg, int cg){
+		super(numNodes, tg, cg);
+		importances = new ImportanceMultipleRun[numNodes];
+		for(int i=0;i<numNodes;i++) {
 			importances[i] = new ImportanceMultipleRun(i);
 		}	
 		numNodesFoundKDivPath = 0;
@@ -31,17 +31,17 @@ public class SingleSourceKDiverseShortPaths_Graph extends SingleSourceKShortestP
 		
 		Random aRandom = new Random();
 
-		while(numNodesFoundKDivPath < numGenes){  
+		while(numNodesFoundKDivPath < numNodes){  
 			int numDeletedEdges = 0;
 			ExecuteInfo stats = this.flowStart();  //start K shortest paths algorithm
 			maxHeap = Math.max(stats.maxHeap, maxHeap);
 			timeToReadMem += stats.timeToReadMem;
 			
-			for(int i=0; i < numGenes ; i++){
+			for(int i=0; i < numNodes ; i++){
 				importances[i].initialize(); 
 			}
 			//delete edges according to the counts of edges
-			for(int i=0; i<numGenes; i++)
+			for(int i=0; i<numNodes; i++)
 				for(int j=0; j < directEdges[i].size(); j++){
 					int count = directEdges[i].elementAt(j).count;
 					if(count > SingleSourceKDiverseShortPaths.KShortestPaths / 2){  //only count / SingleSourceKDiverseShortPaths.KShortestPaths > 1/2 would be deleted
@@ -55,12 +55,12 @@ public class SingleSourceKDiverseShortPaths_Graph extends SingleSourceKShortestP
 				}
 			//System.out.println("number of delete edges:"+numDeletedEdges);
 			//the count of each node is initialized to 0;
-			for(int i=0; i<numGenes; i++)
+			for(int i=0; i<numNodes; i++)
 				for(int j=0; j < directEdges[i].size(); j++)
 					directEdges[i].elementAt(j).count = 0;
 			
 			numItr++;
-			if( numDeletedEdges < (double)numEdges/numGenes)  //if there are no deleted edges in this iteration, convergence and so stop the iteration
+			if( numDeletedEdges < (double)numEdges/numNodes)  //if there are no deleted edges in this iteration, convergence and so stop the iteration
 				break;
 
 		}
@@ -94,7 +94,7 @@ public class SingleSourceKDiverseShortPaths_Graph extends SingleSourceKShortestP
 		}
 		
 		int iterations = 0;
-		int modValue = Math.round( ((float) numGenes) / ((float) numReadings) );
+		int modValue = Math.round( ((float) numNodes) / ((float) numReadings) );
 		
 		while(!pfs.isEmpty()){
 			DistanceWalk pf = pfs.peek();				
@@ -124,7 +124,7 @@ public class SingleSourceKDiverseShortPaths_Graph extends SingleSourceKShortestP
 			}
 		}
 		//System.out.println("total exe. time (secs):" + (System.currentTimeMillis()-timeStart)/1000F);	
-		for(int i=0; i < numGenes  ; i++){   
+		for(int i=0; i < numNodes  ; i++){   
 			this.importances[i].getImportance();
 		}
 		return result;
@@ -241,7 +241,7 @@ public class SingleSourceKDiverseShortPaths_Graph extends SingleSourceKShortestP
 		double totalDistance = 0;
 		int connectedGenes = 0;
 		double totalImps = 0;
-		for(int nodeIdx=0; nodeIdx < numGenes ; nodeIdx++){
+		for(int nodeIdx=0; nodeIdx < numNodes ; nodeIdx++){
 			if(nodeIdx != this.tgnum){
 				
 				//diversity of K paths from the source node to i node = total distinct edges / sum(total edges) of all paths
@@ -273,11 +273,11 @@ public class SingleSourceKDiverseShortPaths_Graph extends SingleSourceKShortestP
 		}	
 //		System.out.println("average importance value:"+ totalImps/connectedGenes+"  ;"+connectedGenes);
 //		System.out.println("average diversity:"+ totalDiversity/connectedGenes );
-		//System.out.println("average total distance:"+ totalDistance/connectedGenes );
+//		System.out.println("average total distance:"+ totalDistance/connectedGenes );
 		
 
 		//sort importance value
-		int rank = numGenes;
+		int rank = numNodes;
 		Arrays.sort(this.importances);
 
 		int highestRankCandidate = 999999, highestRankAmongCandidate = 999999;
@@ -291,27 +291,27 @@ public class SingleSourceKDiverseShortPaths_Graph extends SingleSourceKShortestP
 			}
 			if(this.importances[i].node != cgnum){
 				double impRatio = importances[i].importance/maxImp;
-				output.print(/*"rank:"+i+" "+*/this.importances[i].node + " "+SingleSourceKDiverseShortPaths.GeneInNetwork .get(this.importances[i].node)+" "+importances[i].importance+" div:"+importances[i].diversity	  );
+				output.print(/*"rank:"+i+" "+*/this.importances[i].node + " "+SingleSourceKDiverseShortPaths.nodeNameNetwork .get(this.importances[i].node)+" "+importances[i].importance+" div:"+importances[i].diversity	  );
 				output.println();
 				if(SingleSourceKDiverseShortPaths.RESULT_SHOW_PATHS)
 					for(int pathth = 0; pathth < SingleSourceKDiverseShortPaths.KShortestPaths; pathth++){
 						output.print((pathth+1)+"th path(distance:" + this.importances[i].diverseDistance[pathth]+"):");
 						for(int pathNode=0; pathNode < this.importances[i].diversePaths[pathth].size()-1;pathNode++)
-							output.print(this.importances[i].diversePaths[pathth].elementAt(pathNode).graphNodeNum+"("+SingleSourceKDiverseShortPaths.GeneInNetwork.get(this.importances[i].diversePaths[pathth].elementAt(pathNode).graphNodeNum)+")"+">");
-						output.print(this.importances[i].node+"("+SingleSourceKDiverseShortPaths.GeneInNetwork.get(this.importances[i].node)+")	");
+							output.print(this.importances[i].diversePaths[pathth].elementAt(pathNode).graphNodeNum+"("+SingleSourceKDiverseShortPaths.nodeNameNetwork.get(this.importances[i].diversePaths[pathth].elementAt(pathNode).graphNodeNum)+")"+">");
+						output.print(this.importances[i].node+"("+SingleSourceKDiverseShortPaths.nodeNameNetwork.get(this.importances[i].node)+")	");
 						output.println();
 					}
 			}
 			else{
-				output.print(/*"rank:"+i+" "+*/this.importances[i].node + " "+SingleSourceKDiverseShortPaths.GeneInNetwork.get(this.importances[i].node)+" "+importances[i].importance+"	*");
+				output.print(/*"rank:"+i+" "+*/this.importances[i].node + " "+SingleSourceKDiverseShortPaths.nodeNameNetwork.get(this.importances[i].node)+" "+importances[i].importance+"	*");
 				rank = i;
 				output.println();
 				if(SingleSourceKDiverseShortPaths.RESULT_SHOW_PATHS)
 					for(int pathth = 0; pathth < SingleSourceKDiverseShortPaths.KShortestPaths; pathth++){
 						output.print((pathth+1)+"th path(distance:"+this.importances[i].diverseDistance[pathth]+"):");
 						for(int pathNode=0; pathNode<this.importances[i].diversePaths[pathth].size()-1;pathNode++)
-							output.print(this.importances[i].diversePaths[pathth].elementAt(pathNode).graphNodeNum+"("+SingleSourceKDiverseShortPaths.GeneInNetwork.get(this.importances[i].diversePaths[pathth].elementAt(pathNode).graphNodeNum)+")"+">");
-						output.print(this.importances[i].node+"("+SingleSourceKDiverseShortPaths.GeneInNetwork.get(this.importances[i].node)+")	");
+							output.print(this.importances[i].diversePaths[pathth].elementAt(pathNode).graphNodeNum+"("+SingleSourceKDiverseShortPaths.nodeNameNetwork.get(this.importances[i].diversePaths[pathth].elementAt(pathNode).graphNodeNum)+")"+">");
+						output.print(this.importances[i].node+"("+SingleSourceKDiverseShortPaths.nodeNameNetwork.get(this.importances[i].node)+")	");
 						output.println();
 					}
 				
@@ -319,11 +319,11 @@ public class SingleSourceKDiverseShortPaths_Graph extends SingleSourceKShortestP
 			}
 		}
 		if(highestRankAmongCandidate == rank){  //correct
-			ResultRankOutputStream.println(SingleSourceKDiverseShortPaths.GeneInNetwork.get(tgnum)+" "+SingleSourceKDiverseShortPaths.GeneInNetwork.get(cgnum)+" "+(rank+1)+" *");
+			ResultRankOutputStream.println(SingleSourceKDiverseShortPaths.nodeNameNetwork.get(tgnum)+" "+SingleSourceKDiverseShortPaths.nodeNameNetwork.get(cgnum)+" "+(rank+1)+" *");
 			return true;
 		}
 		else
-			ResultRankOutputStream.println(SingleSourceKDiverseShortPaths.GeneInNetwork.get(tgnum)+" "+SingleSourceKDiverseShortPaths.GeneInNetwork.get(cgnum)+" "+(rank+1)+" "+highestRankCandidate+" "+SingleSourceKDiverseShortPaths.GeneInNetwork.get(highestRankCandidate));
+			ResultRankOutputStream.println(SingleSourceKDiverseShortPaths.nodeNameNetwork.get(tgnum)+" "+SingleSourceKDiverseShortPaths.nodeNameNetwork.get(cgnum)+" "+(rank+1)+" "+highestRankCandidate+" "+SingleSourceKDiverseShortPaths.nodeNameNetwork.get(highestRankCandidate));
 
 		return false;
 	}

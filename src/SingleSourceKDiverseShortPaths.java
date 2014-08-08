@@ -33,7 +33,8 @@ public class SingleSourceKDiverseShortPaths extends SingleSourceKShortestPaths {
 	static double DiversityThreshold; 	
 	
 	public static void main(String[] args) {
-		doTesting(new SingleSourceKDiverseShortPaths());
+		//doTesting(new SingleSourceKDiverseShortPaths());
+		
 	}
 	
 	@Override
@@ -69,7 +70,7 @@ public class SingleSourceKDiverseShortPaths extends SingleSourceKShortestPaths {
 		/*Read all genes*/
 		while(genelistReader.ready()){
 			String geneName = genelistReader.readLine();
-			GeneInNetwork.put( NumTotalGene , geneName);
+			nodeNameNetwork.put( NumTotalGene , geneName);
 			NumTotalGene ++;
 		}
 		genelistReader.close();

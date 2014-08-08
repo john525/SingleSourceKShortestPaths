@@ -16,7 +16,7 @@ public class SingleSourceKShortestPaths_Graph {
 		
 	static double MAX_DISTANCE =  Double.MAX_VALUE ;  //default distance	
 	
-	int numGenes;//number of nodes in this graph
+	int numNodes;//number of nodes in this graph
 	int numEdges;//number of edges in this graph
 	int tgnum;  //the target gene's number
 	int cgnum;  //the causal gene's number
@@ -30,7 +30,7 @@ public class SingleSourceKShortestPaths_Graph {
 	SingleSourceKShortestPaths_Graph(){
 	}
 	
-	SingleSourceKShortestPaths_Graph(int numGenes, int tg, int cg ){
+	SingleSourceKShortestPaths_Graph(int numNodes, int tg, int cg ){
 		if(SingleSourceKShortestPaths.InferringTarget){
 			//the program always starts at the node with the number tgnum, 
 			//so in unknownTarget, we swap the target gene and causal gene 
@@ -41,10 +41,10 @@ public class SingleSourceKShortestPaths_Graph {
 			this.tgnum = tg;
 			this.cgnum = cg;
 		}
-		this.numGenes = numGenes;
-		directEdges = new Vector[numGenes];
-		importances = new Importance[numGenes];
-		for(int i=0;i<numGenes;i++){
+		this.numNodes = numNodes;
+		directEdges = new Vector[numNodes];
+		importances = new Importance[numNodes];
+		for(int i=0;i<numNodes;i++){
 			directEdges[i] = new Vector<TreeNode>();
 			importances[i] = new Importance(i);
 		}	
@@ -230,7 +230,7 @@ public class SingleSourceKShortestPaths_Graph {
 		}
 		
 		int iterations = 0;
-		int modValue = Math.round( ((float) numGenes) / ((float) numReadings) );
+		int modValue = Math.round( ((float) numNodes) / ((float) numReadings) );
 		while(!treePaths.isEmpty()){
 			DistanceWalk treePath = treePaths.peek();				
 			if( treePath.visitedNodes.size() >= Max_Nodes_In_A_Path){  //flow should be terminated based on thresholds, stop spreading
@@ -260,11 +260,11 @@ public class SingleSourceKShortestPaths_Graph {
 			
 			//System.out.println("pf: "+pf.currentNode+" "+pf.currentDistance+" "+pf.visitedNodes.size() + " "+treePaths.size() + ";");
 		}
-		for(int i=0; i < numGenes  ; i++){   
+		for(int i=0; i < numNodes  ; i++){   
 			this.importances[i].getImportance();
 		}		
 		//Verify that testdatagen worked
-//		System.out.println("n="+numGenes);
+//		System.out.println("n="+numNodes);
 //		System.out.println("m="+numEdges);
 		
 		ExecuteInfo result = new ExecuteInfo((System.currentTimeMillis()-timeStart-timeToReadMem)/1000F, maxHeap);
@@ -281,7 +281,7 @@ public class SingleSourceKShortestPaths_Graph {
 	//output true only if it's in candidateCausal and the predict causal gene is correct
 	boolean outputResult(PrintStream output, PrintStream ResultRankOutputStream){
 		//sort importance value
-		int rank = numGenes;
+		int rank = numNodes;
 		Arrays.sort(this.importances);
 		int numTotalGene = SingleSourceKShortestPaths.NumTotalGene;
 		
@@ -292,29 +292,29 @@ public class SingleSourceKShortestPaths_Graph {
 				highestRankCandidate = this.importances[i].node;
 			}
 			if(this.importances[i].node != cgnum){
-				output.print(/*"rank:"+i+" "+*/this.importances[i].node + " "+SingleSourceKShortestPaths.GeneInNetwork.get(this.importances[i].node)+" "+importances[i].importance);
+				output.print(/*"rank:"+i+" "+*/this.importances[i].node + " "+SingleSourceKShortestPaths.nodeNameNetwork.get(this.importances[i].node)+" "+importances[i].importance);
 				output.println();
 				if(SingleSourceKShortestPaths.RESULT_SHOW_PATHS)
 					for(int pathth = 0; pathth < SingleSourceKShortestPaths.KShortestPaths; pathth++){
 						output.print((pathth+1)+"th path(distance:" + this.importances[i].distances[pathth]+"):");
 						for(int pathNode=0; pathNode < this.importances[i].paths[pathth].size()-1;pathNode++) {
-							output.print(this.importances[i].paths[pathth].elementAt(pathNode).graphNodeNum+"("+SingleSourceKShortestPaths.GeneInNetwork.get(this.importances[i].paths[pathth].elementAt(pathNode).graphNodeNum)+")"+">");
+							output.print(this.importances[i].paths[pathth].elementAt(pathNode).graphNodeNum+"("+SingleSourceKShortestPaths.nodeNameNetwork.get(this.importances[i].paths[pathth].elementAt(pathNode).graphNodeNum)+")"+">");
 						}
-						output.print(this.importances[i].node+"("+SingleSourceKShortestPaths.GeneInNetwork.get(this.importances[i].node)+")	");
+						output.print(this.importances[i].node+"("+SingleSourceKShortestPaths.nodeNameNetwork.get(this.importances[i].node)+")	");
 						output.println();
 					}
 			}
 			else {
-				output.print(/*"rank:"+i+" "+*/this.importances[i].node + " "+SingleSourceKShortestPaths.GeneInNetwork.get(this.importances[i].node)+" "+importances[i].importance+"	*");
+				output.print(/*"rank:"+i+" "+*/this.importances[i].node + " "+SingleSourceKShortestPaths.nodeNameNetwork.get(this.importances[i].node)+" "+importances[i].importance+"	*");
 				rank = i;
 				output.println();
 				if(SingleSourceKShortestPaths.RESULT_SHOW_PATHS)
 					for(int pathth = 0; pathth < SingleSourceKShortestPaths.KShortestPaths; pathth++){
 						output.print((pathth+1)+"th path(distance:"+this.importances[i].distances[pathth]+"):");
 						for(int pathNode=0; pathNode<this.importances[i].paths[pathth].size()-1;pathNode++) {
-							output.print(this.importances[i].paths[pathth].elementAt(pathNode).graphNodeNum+"("+SingleSourceKShortestPaths.GeneInNetwork.get(this.importances[i].paths[pathth].elementAt(pathNode).graphNodeNum)+")"+">");
+							output.print(this.importances[i].paths[pathth].elementAt(pathNode).graphNodeNum+"("+SingleSourceKShortestPaths.nodeNameNetwork.get(this.importances[i].paths[pathth].elementAt(pathNode).graphNodeNum)+")"+">");
 						}
-						output.print(this.importances[i].node+"("+SingleSourceKShortestPaths.GeneInNetwork.get(this.importances[i].node)+")	");
+						output.print(this.importances[i].node+"("+SingleSourceKShortestPaths.nodeNameNetwork.get(this.importances[i].node)+")	");
 						output.println();
 					}
 				
@@ -322,11 +322,11 @@ public class SingleSourceKShortestPaths_Graph {
 			}
 		}
 		if(highestRankAmongCandidate == rank){  //correct in CandidateCausal 
-			ResultRankOutputStream.println(SingleSourceKShortestPaths.GeneInNetwork.get(tgnum)+" "+SingleSourceKShortestPaths.GeneInNetwork.get(cgnum)+" "+(rank+1)+" *");
+			ResultRankOutputStream.println(SingleSourceKShortestPaths.nodeNameNetwork.get(tgnum)+" "+SingleSourceKShortestPaths.nodeNameNetwork.get(cgnum)+" "+(rank+1)+" *");
 			return true;
 		}
 		else {
-			ResultRankOutputStream.println(SingleSourceKShortestPaths.GeneInNetwork.get(tgnum)+" "+SingleSourceKShortestPaths.GeneInNetwork.get(cgnum)+" "+(rank+1)+" "+highestRankCandidate+" "+SingleSourceKShortestPaths.GeneInNetwork.get(highestRankCandidate));
+			ResultRankOutputStream.println(SingleSourceKShortestPaths.nodeNameNetwork.get(tgnum)+" "+SingleSourceKShortestPaths.nodeNameNetwork.get(cgnum)+" "+(rank+1)+" "+highestRankCandidate+" "+SingleSourceKShortestPaths.nodeNameNetwork.get(highestRankCandidate));
 		}
 		
 		return false;
