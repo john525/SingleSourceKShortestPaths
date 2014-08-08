@@ -25,15 +25,17 @@ import java.util.Set;
  */
 
 public class SingleSourceKShortestPaths {
+	
+	static String l = System.getProperty("file.separator");
 
 	//modify the directory if necessary
-	static String GraphDir = "../sample_input_graphs/";  //the directory containing graphs for unknownCausal and candidateCausal
-	static String InvGraphDir = "../sample_input_graphs/";  //the directory containing graphs for unknownTarget
+	static String GraphDir = ".."+l+"sample_input_graphs"+l;  //the directory containing graphs for unknownCausal and candidateCausal
+	static String InvGraphDir = ".."+l+"sample_input_graphs"+l;  //the directory containing graphs for unknownTarget
 	
 	static String ResultDirectory;
-	static final String RESULT_DIR_UNKNOWNCAUSAL = "result_causal/";
-	static final String RESULT_DIR_UNKNOWNTARGET = "result_target/";
-	static final String RESULT_DIR_CANDIDATECAUSAL = "result_candidate/";
+	static final String RESULT_DIR_UNKNOWNCAUSAL = "result_causal"+l;
+	static final String RESULT_DIR_UNKNOWNTARGET = "result_target"+l;
+	static final String RESULT_DIR_CANDIDATECAUSAL = "result_candidate"+l;
 	
 	
 	static int KShortestPaths;    //equivalent to "k": the number of paths
@@ -51,10 +53,10 @@ public class SingleSourceKShortestPaths {
 	static long heapStart;
 	
 	public static void main(String[] args) {
-		doTesting();
+		doTesting(new SingleSourceKShortestPaths());
 	}
 	
-	public static void doTesting() {
+	public static void doTesting(SingleSourceKShortestPaths algo) {
 		final int numTrials = 3;
 		double[][][] memData = new double[TestDataGenerator.sizes.length][TestDataGenerator.avgDegrees.length][numTrials];
 		double[][][] timeData = new double[TestDataGenerator.sizes.length][TestDataGenerator.avgDegrees.length][numTrials];
@@ -67,21 +69,22 @@ public class SingleSourceKShortestPaths {
 			for(int size=0; size<TestDataGenerator.sizes.length; size++) {
 				for(int deg=0; deg<TestDataGenerator.avgDegrees.length; deg++) {
 					String loc = "test_data";
-					String subFolder = loc + "/" + "n=" + TestDataGenerator.sizes[size] + ", deg=" + TestDataGenerator.avgDegrees[deg];
-					String[] x = {subFolder+"/allgraphs_all", subFolder+"/allProteins", "5", "2", subFolder+"/"};
+					String subFolder = loc + l + "n=" + TestDataGenerator.sizes[size] + ", deg=" + TestDataGenerator.avgDegrees[deg];
+					String[] x = {subFolder+l+"allgraphs_all", subFolder+l+"allProteins", "5", "2", subFolder+l};
 					System.out.println("Attempting n=" + TestDataGenerator.sizes[size] + " and deg=" + TestDataGenerator.avgDegrees[deg]);
 					
+					
 					try {
-						ExecuteInfo res = runAlgorithm( x );
+						ExecuteInfo res = algo.runAlgorithm( x );
 						memData[size][deg][i] = res.maxHeap;
 						timeData[size][deg][i] = res.time;
+						System.out.println(res);
 					}
 					catch(Exception e) {//IO or maybe NullPointer
 						e.printStackTrace();
 					}
 				}
 			}
-			Runtime.getRuntime().gc();
 		}
 		
 		System.out.println("*****************************************");
@@ -113,8 +116,8 @@ public class SingleSourceKShortestPaths {
 				timeSD[size][deg] /= (double)numTrials;
 				timeSD[size][deg] = Math.sqrt(timeSD[size][deg]);
 
-				memBuilder.append("n="+size+", deg="+deg+": "+memAverages[size][deg]+"±"+memSD[size][deg]+"\n");
-				timeBuilder.append("n="+size+", deg="+deg+": "+timeAverages[size][deg]+"±"+timeSD[size][deg]+"\n");
+				memBuilder.append("n="+TestDataGenerator.sizes[size]+", deg="+TestDataGenerator.avgDegrees[deg]+": "+memAverages[size][deg]+"±"+memSD[size][deg]+"\n");
+				timeBuilder.append("n="+TestDataGenerator.sizes[size]+", deg="+TestDataGenerator.avgDegrees[deg]+": "+timeAverages[size][deg]+"±"+timeSD[size][deg]+"\n");
 			}
 		}
 
@@ -132,18 +135,15 @@ public class SingleSourceKShortestPaths {
 			stream.close();
 			PrintStream stream2 = new PrintStream(timeFile);
 			stream2.println(timeBuilder.toString());
-			stream2
-			.close();
+			stream2.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static ExecuteInfo runAlgorithm(String args[]) throws IOException {		
+	public ExecuteInfo runAlgorithm(String args[]) throws IOException {		
 		heapStart = ExecuteInfo.memoryUsed();
-
-		long deltaHeap = 0;
-
+		
 		NumTotalGene = 0;
 		GeneInNetwork = new Hashtable<Integer,String>();
 
@@ -228,9 +228,10 @@ public class SingleSourceKShortestPaths {
 				aGraph.addDirectEdge(Integer.valueOf(aEdgeInfo[0]), Integer.valueOf(aEdgeInfo[1]), Float.valueOf(aEdgeInfo[2]));	
 			}
 			
+			//FIXME only works if there's just one gold standard
 			res = aGraph.flowStart();  //main process is here!
 			double thistime = res.time;
-			deltaHeap = res.maxHeap - heapStart;
+			res.maxHeap = res.maxHeap - heapStart;
 			
 //			System.out.println("exe. time:"+thistime+" sec");
 			totaltime += thistime;
@@ -238,14 +239,16 @@ public class SingleSourceKShortestPaths {
 			//Testing output code starts
 			PrintStream statsOutput = new PrintStream(GraphDir + "algo stats(" + aGraphFile.getName() + ", Mode " + mode + ")");
 			statsOutput.println("Time: " + thistime + " secs");
-			statsOutput.println("Max Memory: " + deltaHeap/1000000L + "MB");
+			statsOutput.println("Max Memory: " + res.maxHeap/1000000L + "MB");
 			//Testing output code ends
 			
-			System.out.println("Time: " + thistime + " secs");
-			System.out.println("Max Memory: " + deltaHeap/1000000L + "MB");
-			System.out.println();
+//			System.out.println("Time: " + thistime + " secs");
+//			System.out.println("Max Memory: " + res.maxHeap/1000000L + "MB");
+//			System.out.println();
 			
-			PrintStream resultOutputStream = new PrintStream(ResultDirectory+"K="+KShortestPaths+"_shortestPaths"+"_tg:"+tg+"_cg:"+cg);
+			File f = new File(ResultDirectory+"K="+KShortestPaths+"_shortestPaths"+"_tg="+tg+"_cg="+cg);
+			if(!f.exists()) f.createNewFile();
+			PrintStream resultOutputStream = new PrintStream(f);
 			if(aGraph.outputResult(resultOutputStream,ResultRankOutputStream))
 				correctInferCausal++;
 			totalNumCausal++;
