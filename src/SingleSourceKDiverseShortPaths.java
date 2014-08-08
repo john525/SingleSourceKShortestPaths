@@ -33,15 +33,13 @@ public class SingleSourceKDiverseShortPaths extends SingleSourceKShortestPaths {
 	static double DiversityThreshold; 	
 	
 	public static void main(String[] args) {
-		try {
-			runAlgorithm(args);
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-		}
+		doTesting(new SingleSourceKDiverseShortPaths());
 	}
 	
-	public static ExecuteInfo runAlgorithm(String args[]) throws IOException {
+	@Override
+	public ExecuteInfo runAlgorithm(String args[]) throws IOException {
+		long initialHeap = ExecuteInfo.memoryUsed(), maxHeap = initialHeap;
+		
 		KShortestPaths = Integer.valueOf(args[2]);
 		DiversityThreshold = Double.valueOf(args[3]);
 		int mode = Integer.valueOf(args[4]);
@@ -82,7 +80,7 @@ public class SingleSourceKDiverseShortPaths extends SingleSourceKShortestPaths {
 
 		int correctInferCausal = 0;
 		int totalNumCausal = 0;
-		double totaltime = 0;
+		double totaltime = 0, timeToReadMem = 0;
 		int totalItr = 0;
 
 		while(allgoldReader.ready()){
@@ -123,6 +121,8 @@ public class SingleSourceKDiverseShortPaths extends SingleSourceKShortestPaths {
 			System.out.println("exe. time:" + executeInfo.time);
 			totaltime += executeInfo.time;
 			totalItr += executeInfo.numItr;
+			maxHeap = Math.max(executeInfo.maxHeap, maxHeap);
+			//timeToReadMem += executeInfo.timeToReadMem;
 
 			PrintStream resultOutputStream = new PrintStream(ResultDirectory+"K="+KShortestPaths+"_divShortPaths_lambda="+DiversityThreshold+"_tg:"+tg+"_cg:"+cg);
 			if(aGraph.outputResult(resultOutputStream, ResultRankOutputStream)) {
@@ -137,6 +137,8 @@ public class SingleSourceKDiverseShortPaths extends SingleSourceKShortestPaths {
 		System.out.println("avg. number of iterations:" + totalItr/(double)totalNumCausal );
 		ResultRankOutputStream.close();
 		
-		return null;//FIXME In the future, we should actually return some data.
+		ExecuteInfo result = new ExecuteInfo(totaltime, totalItr);
+		result.maxHeap = maxHeap - initialHeap;
+		return result;//FIXME In the future, we should actually return some data.
 	}
 }

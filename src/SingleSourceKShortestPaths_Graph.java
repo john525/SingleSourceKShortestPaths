@@ -13,7 +13,7 @@ public class SingleSourceKShortestPaths_Graph {
 	
 	static final double Epsilon = 0.15f;  //the minimum weight of edges
 	static final int Max_Nodes_In_A_Path = 23;  //equivalent to "h" in our paper  
-	
+		
 	static double MAX_DISTANCE =  Double.MAX_VALUE ;  //default distance	
 	
 	int numGenes;//number of nodes in this graph
@@ -24,6 +24,8 @@ public class SingleSourceKShortestPaths_Graph {
 	
 	Vector<TreeNode>[] directEdges;
 	Importance[] importances;
+	
+	protected final static int numReadings = 5;
 	
 	SingleSourceKShortestPaths_Graph(){
 	}
@@ -208,6 +210,7 @@ public class SingleSourceKShortestPaths_Graph {
 		
 		int source = this.tgnum;   
 		long timeStart = System.currentTimeMillis();
+		long timeToReadMem = 0;
 		DistanceWalk firstTreePath = new DistanceWalk(source);
 
 		PriorityQueue<DistanceWalk> treePaths = new PriorityQueue<DistanceWalk>();  //used to pick the candidate path with minimal distance.
@@ -227,7 +230,6 @@ public class SingleSourceKShortestPaths_Graph {
 		}
 		
 		int iterations = 0;
-		int numReadings = 25;
 		int modValue = Math.round( ((float) numGenes) / ((float) numReadings) );
 		while(!treePaths.isEmpty()){
 			DistanceWalk treePath = treePaths.peek();				
@@ -248,22 +250,26 @@ public class SingleSourceKShortestPaths_Graph {
 			}
 			
 			iterations++;
-			if(iterations % modValue == 0) maxHeap = Math.max(maxHeap, ExecuteInfo.memoryUsed());
+			if(iterations % modValue == 0) {
+				long x = System.currentTimeMillis();
+				maxHeap = Math.max(maxHeap, ExecuteInfo.memoryUsed());
+				long y = System.currentTimeMillis();
+				timeToReadMem += y-x;
+			}
+
 			
 			//System.out.println("pf: "+pf.currentNode+" "+pf.currentDistance+" "+pf.visitedNodes.size() + " "+treePaths.size() + ";");
 		}
 		for(int i=0; i < numGenes  ; i++){   
 			this.importances[i].getImportance();
-		}
-		
-		//One last time
-		maxHeap = Math.max(maxHeap, ExecuteInfo.memoryUsed());
-		
+		}		
 		//Verify that testdatagen worked
 //		System.out.println("n="+numGenes);
 //		System.out.println("m="+numEdges);
 		
-		return new ExecuteInfo((System.currentTimeMillis()-timeStart)/1000F, ExecuteInfo.memoryUsed(), maxHeap);
+		ExecuteInfo result = new ExecuteInfo((System.currentTimeMillis()-timeStart-timeToReadMem)/1000F, maxHeap);
+		//result.timeToReadMem = timeToReadMem;
+		return result;
 		
 	}
 
