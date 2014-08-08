@@ -3,7 +3,6 @@ public class ExecuteInfo {
 	double time;
 	int numItr;
 	long maxHeap;
-	//double timeToReadMem;
 	
 	/**
 	 * @purpose Used for flowStart() in SingleSourceKShortestPaths.
@@ -37,9 +36,5 @@ public class ExecuteInfo {
 		Runtime rt = Runtime.getRuntime();
 		rt.gc();
 		return rt.totalMemory() - rt.freeMemory();
-	}
-	
-	public String toString() {
-		return "Time: " + time  +"s\nMemory:"+(maxHeap/1e6)+"MB";
 	}
 }

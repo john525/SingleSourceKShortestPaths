@@ -25,17 +25,15 @@ public class SingleSourceKDiverseShortPaths_Graph extends SingleSourceKShortestP
 
 	ExecuteInfo multipleRuns(){  //the process which is called by the main function of SingleSourceKDiverseShortPath
 		long timeStart = System.currentTimeMillis();
+
 		int numItr = 0;
-		long maxHeap = 0;
-		long timeToReadMem = 0;
-		
+
 		Random aRandom = new Random();
+
 
 		while(numNodesFoundKDivPath < numGenes){  
 			int numDeletedEdges = 0;
-			ExecuteInfo stats = this.flowStart();  //start K shortest paths algorithm
-			maxHeap = Math.max(stats.maxHeap, maxHeap);
-			//timeToReadMem += stats.timeToReadMem;
+			this.flowStart();  //start K shortest paths algorithm
 			
 			for(int i=0; i < numGenes ; i++){
 				importances[i].initialize(); 
@@ -65,17 +63,13 @@ public class SingleSourceKDiverseShortPaths_Graph extends SingleSourceKShortestP
 
 		}
 		System.out.println("total iterations:"+numItr);
-		ExecuteInfo result = new ExecuteInfo((System.currentTimeMillis()-timeStart)/1000F, numItr);
-		result.maxHeap = maxHeap;
-		//result.timeToReadMem = timeToReadMem;
-		return result;
+		return new ExecuteInfo((System.currentTimeMillis()-timeStart)/1000F, numItr);
 	}
 
 
 	ExecuteInfo flowStart() {
 		int source = this.tgnum;   
-		long timeStart = System.currentTimeMillis(), timeToReadMem = 0;
-		long maxHeap = ExecuteInfo.memoryUsed();
+		long timeStart = System.currentTimeMillis();
 
 		PriorityQueue<DistanceWalk> pfs = new PriorityQueue<DistanceWalk>();
 		DistanceWalk firstpf = new DistanceWalk(source);
@@ -91,10 +85,7 @@ public class SingleSourceKDiverseShortPaths_Graph extends SingleSourceKShortestP
 				pfs.remove(firstpf);
 			storePath(firstpf);
 		}
-		
-		int iterations = 0;
-		int modValue = Math.round( ((float) numGenes) / ((float) numReadings) );
-		
+
 		while(!pfs.isEmpty()){
 			DistanceWalk pf = pfs.peek();				
 			if( pf.visitedNodes.size() >= Max_Nodes_In_A_Path){  //flow should be terminated based on thresholds, stop spreading
@@ -113,22 +104,13 @@ public class SingleSourceKDiverseShortPaths_Graph extends SingleSourceKShortestP
 						pfs.add(newpf);     
 				}
 			}
-			
-			iterations++;
-			if(iterations % modValue == 0) {
-				long x = System.currentTimeMillis();
-				maxHeap = Math.max(maxHeap, ExecuteInfo.memoryUsed());
-				long y = System.currentTimeMillis();
-				timeToReadMem += y-x;
-			}
 		}
 		//System.out.println("total exe. time (secs):" + (System.currentTimeMillis()-timeStart)/1000F);	
 		for(int i=0; i < numGenes  ; i++){   
 			this.importances[i].getImportance();
 		}
-		ExecuteInfo result = new ExecuteInfo((System.currentTimeMillis()-timeStart-timeToReadMem)/1000F, maxHeap);
-		//result.timeToReadMem = timeToReadMem;
-		return result;
+
+		return new ExecuteInfo((System.currentTimeMillis()-timeStart)/1000F);
 		
 	}
 

@@ -13,7 +13,7 @@ public class SingleSourceKShortestPaths_Graph {
 	
 	static final double Epsilon = 0.15f;  //the minimum weight of edges
 	static final int Max_Nodes_In_A_Path = 23;  //equivalent to "h" in our paper  
-		
+	
 	static double MAX_DISTANCE =  Double.MAX_VALUE ;  //default distance	
 	
 	int numGenes;//number of nodes in this graph
@@ -25,7 +25,7 @@ public class SingleSourceKShortestPaths_Graph {
 	Vector<TreeNode>[] directEdges;
 	Importance[] importances;
 	
-	protected final static int numReadings = 5;
+	protected final static int numReadings = 3;
 	
 	SingleSourceKShortestPaths_Graph(){
 	}
@@ -207,10 +207,10 @@ public class SingleSourceKShortestPaths_Graph {
 	ExecuteInfo flowStart() {
 		
 		long maxHeap = ExecuteInfo.memoryUsed();
+		long timeToReadMem = 0;
 		
 		int source = this.tgnum;   
 		long timeStart = System.currentTimeMillis();
-		long timeToReadMem = 0;
 		DistanceWalk firstTreePath = new DistanceWalk(source);
 
 		PriorityQueue<DistanceWalk> treePaths = new PriorityQueue<DistanceWalk>();  //used to pick the candidate path with minimal distance.
@@ -256,21 +256,14 @@ public class SingleSourceKShortestPaths_Graph {
 				long y = System.currentTimeMillis();
 				timeToReadMem += y-x;
 			}
-
 			
 			//System.out.println("pf: "+pf.currentNode+" "+pf.currentDistance+" "+pf.visitedNodes.size() + " "+treePaths.size() + ";");
 		}
 		for(int i=0; i < numGenes  ; i++){   
 			this.importances[i].getImportance();
-		}		
-		//Verify that testdatagen worked
-//		System.out.println("n="+numGenes);
-//		System.out.println("m="+numEdges);
+		}
 		
-		ExecuteInfo result = new ExecuteInfo((System.currentTimeMillis()-timeStart-timeToReadMem)/1000F, maxHeap);
-		//result.timeToReadMem = timeToReadMem;
-		return result;
-		
+		return new ExecuteInfo((System.currentTimeMillis()-timeStart-timeToReadMem)/1000F, maxHeap);
 	}
 
 

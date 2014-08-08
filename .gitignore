@@ -1,1 +1,4 @@
 test_data/*
+result_target/*
+result_causal/*
+result_candidate/*
