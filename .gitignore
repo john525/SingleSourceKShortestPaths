@@ -1,10 +1,4 @@
 test_data/*
 result_target/*
-<<<<<<< HEAD
 result_causal/*
 result_candidate/*
-=======
-result_candidate/*
-result_causal/*
-hlim_data/*
->>>>>>> origin/master
