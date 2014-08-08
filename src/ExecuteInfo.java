@@ -3,7 +3,7 @@ public class ExecuteInfo {
 	double time;
 	int numItr;
 	long maxHeap;
-	//double timeToReadMem;
+	long timeToReadMem;
 	
 	/**
 	 * @purpose Used for flowStart() in SingleSourceKShortestPaths.
@@ -28,6 +28,10 @@ public class ExecuteInfo {
 		numItr = itr;
 	}
 	
+	public ExecuteInfo() {
+		// TODO Auto-generated constructor stub
+	}
+
 	/**
 	 * 
 	 * @return The number of bytes in the heap. Should be normalized by subtracting

@@ -14,10 +14,10 @@ import java.util.Set;
  * args[0] is the file indicating all gold standards. The format is described in readme.
  * args[1] is the gene number and gene name mapping. The format is described in readme.
  * args[2] is K, the number of shortest paths
- * args[3] is lambda, the diversity threshold to determine whether a path is diverse or not.
- * args[4] is the choice of mode (1 for unknownCausal, 2 for unknownTarget, 3 for candidateCausal)
+ * args[3] is the choice of mode (1 for unknownCausal, 2 for unknownTarget, 3 for candidateCausal)
  * output is a set of weighted graph for each target gene.  
- * 
+ * args[4] is GraphDir = InvGraphDir
+ * args[5] is lambda, the diversity threshold to determine whether a path is diverse or not.
  * the code is similar to SingleSourceKShortestPaths. So please refer to the comment in SingleSourceKShortestPaths.java
 
  * The program is made by Yu-Keng Shih from the Ohio State University
@@ -41,8 +41,9 @@ public class SingleSourceKDiverseShortPaths extends SingleSourceKShortestPaths {
 		long initialHeap = ExecuteInfo.memoryUsed(), maxHeap = initialHeap;
 		
 		KShortestPaths = Integer.valueOf(args[2]);
-		DiversityThreshold = Double.valueOf(args[3]);
-		int mode = Integer.valueOf(args[4]);
+		DiversityThreshold = Double.valueOf(args[5]);
+		GraphDir = InvGraphDir = args[4];
+		int mode = Integer.valueOf(args[3]);
 		if(mode == 1){
 			StopCandidate = false;
 			InferringTarget = false;
@@ -132,13 +133,13 @@ public class SingleSourceKDiverseShortPaths extends SingleSourceKShortestPaths {
 			resultOutputStream.close();
 			
 		}  
-		System.out.println("accuracy:"+correctInferCausal+"/"+totalNumCausal+" = "+((double)correctInferCausal/(double)totalNumCausal));
-		System.out.println("avg. execution time (secs):" + totaltime);
-		System.out.println("avg. number of iterations:" + totalItr/(double)totalNumCausal );
+//		System.out.println("accuracy:"+correctInferCausal+"/"+totalNumCausal+" = "+((double)correctInferCausal/(double)totalNumCausal));
+//		System.out.println("avg. execution time (secs):" + totaltime);
+//		System.out.println("avg. number of iterations:" + totalItr/(double)totalNumCausal );
 		ResultRankOutputStream.close();
 		
 		ExecuteInfo result = new ExecuteInfo(totaltime, totalItr);
 		result.maxHeap = maxHeap - initialHeap;
-		return result;//FIXME In the future, we should actually return some data.
+		return result;
 	}
 }

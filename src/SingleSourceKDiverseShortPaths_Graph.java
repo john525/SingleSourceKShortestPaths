@@ -35,7 +35,7 @@ public class SingleSourceKDiverseShortPaths_Graph extends SingleSourceKShortestP
 			int numDeletedEdges = 0;
 			ExecuteInfo stats = this.flowStart();  //start K shortest paths algorithm
 			maxHeap = Math.max(stats.maxHeap, maxHeap);
-			//timeToReadMem += stats.timeToReadMem;
+			timeToReadMem += stats.timeToReadMem;
 			
 			for(int i=0; i < numGenes ; i++){
 				importances[i].initialize(); 
@@ -64,18 +64,19 @@ public class SingleSourceKDiverseShortPaths_Graph extends SingleSourceKShortestP
 				break;
 
 		}
-		System.out.println("total iterations:"+numItr);
-		ExecuteInfo result = new ExecuteInfo((System.currentTimeMillis()-timeStart)/1000F, numItr);
+//		System.out.println("total iterations:"+numItr);
+		ExecuteInfo result = new ExecuteInfo((System.currentTimeMillis()-timeStart-timeToReadMem)/1000F, numItr);
 		result.maxHeap = maxHeap;
-		//result.timeToReadMem = timeToReadMem;
 		return result;
 	}
 
 
 	ExecuteInfo flowStart() {
 		int source = this.tgnum;   
-		long timeStart = System.currentTimeMillis(), timeToReadMem = 0;
-		long maxHeap = ExecuteInfo.memoryUsed();
+		long timeStart = System.currentTimeMillis();
+		ExecuteInfo result = new ExecuteInfo();
+		result.timeToReadMem = 0;
+		result.maxHeap = ExecuteInfo.memoryUsed();
 
 		PriorityQueue<DistanceWalk> pfs = new PriorityQueue<DistanceWalk>();
 		DistanceWalk firstpf = new DistanceWalk(source);
@@ -117,17 +118,15 @@ public class SingleSourceKDiverseShortPaths_Graph extends SingleSourceKShortestP
 			iterations++;
 			if(iterations % modValue == 0) {
 				long x = System.currentTimeMillis();
-				maxHeap = Math.max(maxHeap, ExecuteInfo.memoryUsed());
+				result.maxHeap = Math.max(result.maxHeap, ExecuteInfo.memoryUsed());
 				long y = System.currentTimeMillis();
-				timeToReadMem += y-x;
+				result.timeToReadMem += y-x;
 			}
 		}
 		//System.out.println("total exe. time (secs):" + (System.currentTimeMillis()-timeStart)/1000F);	
 		for(int i=0; i < numGenes  ; i++){   
 			this.importances[i].getImportance();
 		}
-		ExecuteInfo result = new ExecuteInfo((System.currentTimeMillis()-timeStart-timeToReadMem)/1000F, maxHeap);
-		//result.timeToReadMem = timeToReadMem;
 		return result;
 		
 	}
@@ -272,8 +271,8 @@ public class SingleSourceKDiverseShortPaths_Graph extends SingleSourceKShortestP
 				}
 			}
 		}	
-		System.out.println("average importance value:"+ totalImps/connectedGenes+"  ;"+connectedGenes);
-		System.out.println("average diversity:"+ totalDiversity/connectedGenes );
+//		System.out.println("average importance value:"+ totalImps/connectedGenes+"  ;"+connectedGenes);
+//		System.out.println("average diversity:"+ totalDiversity/connectedGenes );
 		//System.out.println("average total distance:"+ totalDistance/connectedGenes );
 		
 

@@ -1,3 +1,5 @@
+import java.awt.Graphics;
+import java.awt.Image;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -6,6 +8,12 @@ import java.io.PrintStream;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
 
 /*
  * This program implements the single-source K shortest paths algorithm. More detail can be found in: Yu-Keng Shih and Srinivasan Parthasarathy, A single-source k shortest paths algorithm to infer regulatory pathways in a gene network, to appear in ISMB 2012
@@ -57,6 +65,27 @@ public class SingleSourceKShortestPaths {
 	}
 	
 	public static void doTesting(SingleSourceKShortestPaths algo) {
+		JFrame frame = new JFrame("K Shortest Paths Algorithm");
+		frame.setSize(669,470);
+		frame.setLocationRelativeTo(null);
+		frame.setVisible(true);
+		JPanel p = new JPanel() {
+			Image kevin;
+			@Override
+			public void paintComponent(Graphics g) {
+				if(kevin==null) {
+					try {
+						kevin = ImageIO.read(new File("kevin.jpg"));
+					}
+					catch(IOException e) {
+						kevin = null;
+					}
+				}
+				g.drawImage(kevin, 0, 0, 669, 470, null);
+			}
+		};
+		frame.add(p);
+		
 		final int numTrials = 3;
 		double[][][] memData = new double[TestDataGenerator.sizes.length][TestDataGenerator.avgDegrees.length][numTrials];
 		double[][][] timeData = new double[TestDataGenerator.sizes.length][TestDataGenerator.avgDegrees.length][numTrials];
@@ -70,7 +99,7 @@ public class SingleSourceKShortestPaths {
 				for(int deg=0; deg<TestDataGenerator.avgDegrees.length; deg++) {
 					String loc = "test_data";
 					String subFolder = loc + l + "n=" + TestDataGenerator.sizes[size] + ", deg=" + TestDataGenerator.avgDegrees[deg];
-					String[] x = {subFolder+l+"allgraphs_all", subFolder+l+"allProteins", "5", "2", subFolder+l};
+					String[] x = {subFolder+l+"allgraphs_all", subFolder+l+"allProteins", "5", "2", subFolder+l, "0.5"};
 					System.out.println("Attempting n=" + TestDataGenerator.sizes[size] + " and deg=" + TestDataGenerator.avgDegrees[deg]);
 					
 					
@@ -79,6 +108,7 @@ public class SingleSourceKShortestPaths {
 						memData[size][deg][i] = res.maxHeap;
 						timeData[size][deg][i] = res.time;
 						System.out.println(res);
+						System.out.println();
 					}
 					catch(Exception e) {//IO or maybe NullPointer
 						e.printStackTrace();
@@ -116,8 +146,8 @@ public class SingleSourceKShortestPaths {
 				timeSD[size][deg] /= (double)numTrials;
 				timeSD[size][deg] = Math.sqrt(timeSD[size][deg]);
 
-				memBuilder.append("n="+TestDataGenerator.sizes[size]+", deg="+TestDataGenerator.avgDegrees[deg]+": "+memAverages[size][deg]+"±"+memSD[size][deg]+"\n");
-				timeBuilder.append("n="+TestDataGenerator.sizes[size]+", deg="+TestDataGenerator.avgDegrees[deg]+": "+timeAverages[size][deg]+"±"+timeSD[size][deg]+"\n");
+				memBuilder.append("n="+TestDataGenerator.sizes[size]+", deg="+TestDataGenerator.avgDegrees[deg]+": "+memAverages[size][deg]+"ï¿½"+memSD[size][deg]+"\n");
+				timeBuilder.append("n="+TestDataGenerator.sizes[size]+", deg="+TestDataGenerator.avgDegrees[deg]+": "+timeAverages[size][deg]+"ï¿½"+timeSD[size][deg]+"\n");
 			}
 		}
 
@@ -136,6 +166,10 @@ public class SingleSourceKShortestPaths {
 			PrintStream stream2 = new PrintStream(timeFile);
 			stream2.println(timeBuilder.toString());
 			stream2.close();
+			JTextArea text = new JTextArea();
+			frame.add(text);
+			text.setText("TIME:\n" + timeBuilder.toString() + "\nMEMORY:\n" + memBuilder.toString());
+			frame.repaint();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -148,7 +182,9 @@ public class SingleSourceKShortestPaths {
 		GeneInNetwork = new Hashtable<Integer,String>();
 
 		KShortestPaths = Integer.valueOf(args[2]);
+		GraphDir = InvGraphDir = args[4];
 		int mode = Integer.valueOf(args[3]);
+		
 		if(mode == 1){  //unknownCausal
 			StopCandidate = false;
 			InferringTarget = false;
